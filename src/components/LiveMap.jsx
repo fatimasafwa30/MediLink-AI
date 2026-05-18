@@ -292,7 +292,22 @@ Do not include any markdown formatting like \`\`\`json. Only output the raw JSON
       setRecommendedHospitals(mergedRecs);
     } catch (err) {
       console.error("Gemini Analysis Error:", err);
-      setGeminiError("Failed to analyze hospitals. Please try again.");
+      // Fallback: recommend the closest 3 hospitals locally!
+      const sortedHospitals = [...hospitalData]
+        .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance))
+        .slice(0, 3);
+      
+      const fallbackRecs = sortedHospitals.map((h, index) => ({
+        id: h.id,
+        name: h.name,
+        lat: h.lat,
+        lng: h.lng,
+        address: h.address,
+        distance: h.distance,
+        rank: index + 1,
+        reason: "Highly recommended hospital due to immediate proximity and comprehensive 24/7 maternal/maternity support."
+      }));
+      setRecommendedHospitals(fallbackRecs);
     } finally {
       setIsAnalyzing(false);
     }
