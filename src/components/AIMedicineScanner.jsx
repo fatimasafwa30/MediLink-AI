@@ -1185,7 +1185,7 @@ export default function AIMedicineScanner() {
               </motion.div>
             )}
 
-            {/* Footer Action: Sync to Supabase / Health Twin */}
+            {/* Footer Action: Sync to Health Twin & Medical Passport */}
             <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-xs font-sans text-text-muted">
                 <ShieldAlert size={14} className="text-accent" />
@@ -1201,9 +1201,9 @@ export default function AIMedicineScanner() {
                 }`}
               >
                 {isSavedToTwin ? (
-                  <><Check size={14} /> Synced with Supabase & Health Twin</>
+                  <><Check size={14} /> Saved to Medical Passport</>
                 ) : (
-                  <><Sparkles size={14} /> Save Verification to Supabase</>
+                  <><Sparkles size={14} /> Log Verification to Health Twin</>
                 )}
               </button>
             </div>
