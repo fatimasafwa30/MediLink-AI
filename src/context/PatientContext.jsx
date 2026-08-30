@@ -50,8 +50,47 @@ export const DOCTOR_PRESETS = [
   }
 ];
 
+// Helper to format clean human names from email (e.g. fatimasafwa30@gmail.com -> Fatima Safwa)
+const formatNameFromEmail = (email) => {
+  const prefix = email.split('@')[0].replace(/[0-9_.]/g, ' ').trim();
+  if (!prefix) return 'Fatima Safwa';
+  return prefix.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+};
+
 // Default Real Patient Profiles
 export const REAL_PATIENT_PRESETS = [
+  {
+    id: 'patient-fatima',
+    fullName: 'Fatima Safwa',
+    email: 'fatimasafwa30@gmail.com',
+    age: 22,
+    gender: 'Female',
+    bloodType: 'O+',
+    weightKg: 58,
+    heightCm: 165,
+    insuranceId: 'ML-992014-F',
+    isOrganDonor: true,
+    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=250&q=80',
+    biometrics: {
+      heartRate: 72,
+      oxygen: 99,
+      stress: 28,
+      hydration: 85,
+      score: 94,
+      bloodPressure: '118/76',
+      glucoseMgDl: 90
+    },
+    emergencyPassport: {
+      allergies: ['None (No known drug allergies)'],
+      conditions: ['Healthy - Routine Medical Baseline'],
+      medications: ['Multivitamins'],
+      prescriptions: [],
+      emergencyContacts: [
+        { name: 'Family Emergency Contact', phone: '+1 (555) 910-4488', relation: 'Family' }
+      ],
+      primaryDoctor: { name: 'Dr. Aisha Rahman', specialty: 'Family & Emergency Medicine', phone: '+1 (555) 990-1000' }
+    }
+  },
   {
     id: 'patient-001',
     fullName: 'Johnathan Doe',
@@ -98,99 +137,6 @@ export const REAL_PATIENT_PRESETS = [
       ],
       primaryDoctor: { name: 'Dr. Aris Thorne', specialty: 'Pulmonology & General Practice', phone: '+1 (555) 441-2099' }
     }
-  },
-  {
-    id: 'patient-002',
-    fullName: 'Elena Rostova',
-    email: 'elena.rostova@medilink.ai',
-    age: 34,
-    gender: 'Female',
-    bloodType: 'O-',
-    weightKg: 62,
-    heightCm: 168,
-    insuranceId: 'ML-9102455-O',
-    isOrganDonor: true,
-    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=250&q=80',
-    biometrics: {
-      heartRate: 82,
-      oxygen: 99,
-      stress: 58,
-      hydration: 75,
-      score: 89,
-      bloodPressure: '115/75',
-      glucoseMgDl: 88
-    },
-    emergencyPassport: {
-      allergies: ['Sulfa Drugs', 'Aspirin'],
-      conditions: ['Hypertension (Stage 1)', 'Migraine'],
-      medications: ['Lisinopril 10mg', 'Sumatriptan 50mg'],
-      prescriptions: [
-        {
-          id: 'rx-201',
-          medicineName: 'Lisinopril',
-          strength: '10mg',
-          form: 'Tablet',
-          frequency: 'Once daily (every 24 hrs)',
-          timingSchedule: ['08:00 AM (Morning with breakfast)'],
-          foodInstructions: 'Take with full glass of water. Monitor blood pressure daily.',
-          prescribedBy: 'Dr. Elena Rostova, MD',
-          prescribedDate: '2026-08-20',
-          duration: '90 Days Maintenance',
-          status: 'Active'
-        }
-      ],
-      emergencyContacts: [
-        { name: 'Dmitri Rostov', phone: '+1 (555) 902-7712', relation: 'Spouse' }
-      ],
-      primaryDoctor: { name: 'Dr. Marcus Vance', specialty: 'Neurology & Internal Med', phone: '+1 (555) 882-1004' }
-    }
-  },
-  {
-    id: 'patient-003',
-    fullName: 'David Miller',
-    email: 'david.miller@medilink.ai',
-    age: 52,
-    gender: 'Male',
-    bloodType: 'A+',
-    weightKg: 88,
-    heightCm: 178,
-    insuranceId: 'ML-3329184-A',
-    isOrganDonor: false,
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=250&q=80',
-    biometrics: {
-      heartRate: 68,
-      oxygen: 97,
-      stress: 35,
-      hydration: 70,
-      score: 76,
-      bloodPressure: '135/85',
-      glucoseMgDl: 142
-    },
-    emergencyPassport: {
-      allergies: ['NSAIDs (Ibuprofen/Naproxen)', 'Latex'],
-      conditions: ['Type 2 Diabetes', 'Coronary Artery Disease'],
-      medications: ['Metformin 500mg ER', 'Atorvastatin 20mg'],
-      prescriptions: [
-        {
-          id: 'rx-301',
-          medicineName: 'Metformin Hydrochloride (ER)',
-          strength: '500mg',
-          form: 'Extended Release Tablet',
-          frequency: 'Once daily with evening meal',
-          timingSchedule: ['07:30 PM (Dinner)'],
-          foodInstructions: 'Swallow whole with dinner. Do NOT crush or chew.',
-          prescribedBy: 'Dr. Aisha Rahman, MD',
-          prescribedDate: '2026-08-10',
-          duration: '60 Days Refill',
-          status: 'Active'
-        }
-      ],
-      emergencyContacts: [
-        { name: 'Claire Miller', phone: '+1 (555) 304-9988', relation: 'Wife' },
-        { name: 'Dr. Aisha Rahman', phone: '+1 (555) 990-1000', relation: 'Cardiologist' }
-      ],
-      primaryDoctor: { name: 'Dr. Aisha Rahman', specialty: 'Cardiology', phone: '+1 (555) 990-1000' }
-    }
   }
 ];
 
@@ -202,7 +148,17 @@ export const PatientProvider = ({ children }) => {
     const saved = localStorage.getItem('medilink_active_patient');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        // If saved profile was fatima or generic, ensure nice formatted name
+        if (parsed.email?.toLowerCase().includes('fatima')) {
+          return {
+            ...parsed,
+            fullName: parsed.fullName?.includes('FATIMASAFWA') ? 'Fatima Safwa' : parsed.fullName,
+            gender: parsed.gender === 'Other' ? 'Female' : parsed.gender,
+            avatarUrl: parsed.avatarUrl || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=250&q=80'
+          };
+        }
+        return parsed;
       } catch (e) {
         console.error("Failed to parse saved patient:", e);
       }
@@ -320,7 +276,6 @@ export const PatientProvider = ({ children }) => {
       status: 'Active'
     };
 
-    // Update patient in allPatients state
     setAllPatients(prevPatients => {
       return prevPatients.map(patient => {
         if (patient.id === patientId) {
@@ -328,7 +283,6 @@ export const PatientProvider = ({ children }) => {
           const currentMeds = currentPassport.medications || [];
           const currentRxs = currentPassport.prescriptions || [];
 
-          // Add to medications list if not present
           const medLabel = `${newPrescription.medicineName} ${newPrescription.strength}`;
           const updatedMeds = currentMeds.includes(medLabel) ? currentMeds : [medLabel, ...currentMeds];
 
@@ -341,7 +295,6 @@ export const PatientProvider = ({ children }) => {
             }
           };
 
-          // If this is currently active patient, sync active patient
           if (activePatient?.id === patientId) {
             setActivePatient(updatedPatient);
           }
@@ -352,7 +305,6 @@ export const PatientProvider = ({ children }) => {
       });
     });
 
-    // Notify patient
     const noticeText = `${activeDoctor?.fullName || 'Your Doctor'} prescribed ${newPrescription.medicineName} (${newPrescription.strength}) with updated timing schedule.`;
     setPatientNotification({
       id: Date.now(),
@@ -362,7 +314,6 @@ export const PatientProvider = ({ children }) => {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
 
-    // Try Supabase sync
     try {
       if (supabase) {
         await supabase
@@ -408,7 +359,7 @@ export const PatientProvider = ({ children }) => {
     });
   };
 
-  // Update active patient details
+  // Update active patient details & real biometrics
   const updatePatientProfile = (updatedFields) => {
     setActivePatient(prev => {
       const updated = {
@@ -427,6 +378,25 @@ export const PatientProvider = ({ children }) => {
       setAllPatients(all => all.map(p => p.id === updated.id ? updated : p));
       return updated;
     });
+
+    // Sync to Supabase
+    try {
+      if (supabase && activePatient?.id) {
+        supabase
+          .from('biometrics')
+          .insert([
+            {
+              user_id: activePatient.id,
+              heart_rate: updatedFields.biometrics?.heartRate || activePatient.biometrics?.heartRate,
+              oxygen_level: updatedFields.biometrics?.oxygen || activePatient.biometrics?.oxygen,
+              health_score: updatedFields.biometrics?.score || activePatient.biometrics?.score,
+              recorded_at: new Date().toISOString()
+            }
+          ]).then(() => {});
+      }
+    } catch (e) {
+      console.warn("Supabase vitals sync:", e);
+    }
   };
 
   // Patient Login function
@@ -439,69 +409,74 @@ export const PatientProvider = ({ children }) => {
       return { success: true, patient: existing };
     }
 
-    const demoPatient = {
+    const isFemaleName = email.toLowerCase().includes('fatima') || email.toLowerCase().includes('sarah') || email.toLowerCase().includes('elena') || email.toLowerCase().includes('mary');
+    const formattedName = formatNameFromEmail(email);
+
+    const newPatient = {
       id: 'patient-' + Date.now(),
-      fullName: email.split('@')[0].toUpperCase(),
+      fullName: formattedName,
       email,
-      age: 30,
-      gender: 'Other',
-      bloodType: 'A+',
-      weightKg: 70,
-      heightCm: 175,
+      age: 22,
+      gender: isFemaleName ? 'Female' : 'Male',
+      bloodType: 'O+',
+      weightKg: 58,
+      heightCm: 165,
       insuranceId: 'ML-' + Math.floor(1000000 + Math.random() * 9000000),
       isOrganDonor: true,
-      avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=250&q=80',
+      avatarUrl: isFemaleName 
+        ? 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=250&q=80'
+        : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
       biometrics: {
-        heartRate: 75,
-        oxygen: 98,
-        stress: 45,
-        hydration: 80,
-        score: 80,
-        bloodPressure: '120/80',
-        glucoseMgDl: 95
+        heartRate: 72,
+        oxygen: 99,
+        stress: 25,
+        hydration: 85,
+        score: 95,
+        bloodPressure: '118/76',
+        glucoseMgDl: 90
       },
       emergencyPassport: {
-        allergies: ['Penicillin'],
-        conditions: ['Asthma'],
-        medications: ['Inhaler as needed'],
+        allergies: ['No known drug allergies'],
+        conditions: ['Healthy Baseline'],
+        medications: ['None (Routine Health)'],
         prescriptions: [],
-        emergencyContacts: [{ name: 'Family Contact', phone: '+1 (555) 012-3456', relation: 'Family' }],
-        primaryDoctor: { name: 'Dr. Aris Thorne', specialty: 'Internal Medicine', phone: '+1 (555) 441-2099' }
+        emergencyContacts: [{ name: 'Family Emergency Contact', phone: '+1 (555) 910-4488', relation: 'Family' }],
+        primaryDoctor: { name: 'Dr. Aisha Rahman', specialty: 'Family & Internal Medicine', phone: '+1 (555) 990-1000' }
       }
     };
 
-    setAllPatients(prev => [demoPatient, ...prev]);
-    setActivePatient(demoPatient);
+    setAllPatients(prev => [newPatient, ...prev]);
+    setActivePatient(newPatient);
     setIsAuthenticated(true);
-    localStorage.setItem('medilink_auth_token', 'local_token_' + demoPatient.id);
-    return { success: true, patient: demoPatient };
+    localStorage.setItem('medilink_auth_token', 'local_token_' + newPatient.id);
+    return { success: true, patient: newPatient };
   };
 
-  // Register real patient
+  // Register custom real patient
   const registerPatient = async (patientData) => {
     const newId = 'patient-' + Date.now();
     const fullPatient = {
       id: newId,
       fullName: patientData.fullName || 'Registered Patient',
       email: patientData.email,
-      age: Number(patientData.age) || 28,
-      gender: patientData.gender || 'Not specified',
+      age: Number(patientData.age) || 22,
+      gender: patientData.gender || 'Female',
       bloodType: patientData.bloodType || 'O+',
-      weightKg: Number(patientData.weightKg) || 70,
-      heightCm: Number(patientData.heightCm) || 175,
+      weightKg: Number(patientData.weightKg) || 58,
+      heightCm: Number(patientData.heightCm) || 165,
       insuranceId: patientData.insuranceId || 'ML-' + Math.floor(1000000 + Math.random() * 9000000),
       isOrganDonor: Boolean(patientData.isOrganDonor),
-      avatarUrl: patientData.gender === 'Female' 
-        ? 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=250&q=80'
-        : 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=250&q=80',
+      avatarUrl: patientData.avatarUrl || (patientData.gender === 'Female' 
+        ? 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=250&q=80'
+        : 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=250&q=80'),
       biometrics: {
         heartRate: Number(patientData.heartRate) || 72,
-        oxygen: Number(patientData.oxygen) || 98,
-        stress: Number(patientData.stress) || 40,
-        hydration: Number(patientData.hydration) || 80,
-        score: 85,
-        bloodPressure: patientData.bloodPressure || '120/80',
-        glucoseMgDl: Number(patientData.glucoseMgDl) || 95
+        oxygen: Number(patientData.oxygen) || 99,
+        stress: Number(patientData.stress) || 28,
+        hydration: Number(patientData.hydration) || 85,
+        score: 92,
+        bloodPressure: patientData.bloodPressure || '118/76',
+        glucoseMgDl: Number(patientData.glucoseMgDl) || 90
       },
       emergencyPassport: {
         allergies: Array.isArray(patientData.allergies) 
@@ -522,9 +497,9 @@ export const PatientProvider = ({ children }) => {
           }
         ],
         primaryDoctor: {
-          name: patientData.doctorName || 'Dr. Aris Thorne, MD',
+          name: patientData.doctorName || 'Dr. Aisha Rahman, MD',
           specialty: patientData.doctorSpecialty || 'Family & Emergency Medicine',
-          phone: patientData.doctorPhone || '+1 (555) 441-2099'
+          phone: patientData.doctorPhone || '+1 (555) 990-1000'
         }
       }
     };
