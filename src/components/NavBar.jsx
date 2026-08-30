@@ -1,22 +1,28 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Activity, User, LogIn, LogOut, ChevronDown, ShieldCheck, Heart, Sparkles, Stethoscope } from 'lucide-react';
+import { 
+  Activity, User, LogIn, LogOut, ChevronDown, ShieldCheck, Heart, Sparkles, 
+  Stethoscope, Menu, X, Pill, MapPin, Radio, LayoutDashboard, AlertCircle 
+} from 'lucide-react';
 import { usePatient, REAL_PATIENT_PRESETS, DOCTOR_PRESETS } from '../context/PatientContext';
 
 const NavBar = () => {
   const navigate = useNavigate();
-  const { activePatient, activeDoctor, isDoctorLoggedIn, switchPatient, logout } = usePatient();
+  const { activePatient, activeDoctor, switchPatient, logout } = usePatient();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
   const navItems = [
-    { name: 'Home', path: '/' },
-    { name: 'Emergency AI', path: '/emergency' },
-    { name: 'Health Twin', path: '/health-twin' },
-    { name: 'Live Map', path: '/map' },
-    { name: 'Drone Support', path: '/drones' },
-    { name: 'Medicine Scanner', path: '/scanner' },
-    { name: 'Dashboard', path: '/dashboard' }
+    { name: 'Home', path: '/', icon: Activity },
+    { name: 'Emergency AI', path: '/emergency', icon: AlertCircle },
+    { name: 'Health Twin', path: '/health-twin', icon: Heart },
+    { name: 'Live Map', path: '/map', icon: MapPin },
+    { name: 'Drone Support', path: '/drones', icon: Radio },
+    { name: 'Medicine Scanner', path: '/scanner', icon: Pill },
+    { name: 'Doctor Portal', path: '/doctor-portal', icon: Stethoscope },
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard }
   ];
 
   // Close dropdown on click outside
@@ -24,6 +30,9 @@ const NavBar = () => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setDropdownOpen(false);
+      }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target) && !e.target.closest('#mobile-menu-btn')) {
+        setMobileMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -44,14 +53,14 @@ const NavBar = () => {
           </span>
         </Link>
         
-        {/* Desktop Navigation Links */}
-        <div className="hidden xl:flex items-center gap-5">
+        {/* Desktop & Laptop Navigation Links (visible on lg screens and up) */}
+        <div className="hidden lg:flex items-center gap-4 xl:gap-5">
           {navItems.map((item) => (
             <NavLink
               key={item.name}
               to={item.path}
               className={({ isActive }) => 
-                `font-orbitron text-xs font-semibold tracking-wider transition-colors uppercase ${
+                `font-orbitron text-xs font-semibold tracking-wider transition-colors uppercase whitespace-nowrap ${
                   isActive ? 'text-accent border-b-2 border-accent pb-1' : 'text-text-muted hover:text-text'
                 }`
               }
@@ -61,14 +70,14 @@ const NavBar = () => {
           ))}
         </div>
 
-        {/* Right Section: Doctor Portal Button & Patient Profile Badge */}
-        <div className="flex items-center gap-3">
+        {/* Right Section: Mobile Hamburger Toggle + Patient Profile Badge */}
+        <div className="flex items-center gap-2 sm:gap-3">
           
-          {/* Doctor Portal Action Button */}
+          {/* Doctor Portal Quick Pill on large screens */}
           <NavLink
             to="/doctor-portal"
             className={({ isActive }) => 
-              `px-3 py-2 rounded-xl text-xs font-orbitron font-bold flex items-center gap-1.5 transition-all ${
+              `hidden md:flex px-3 py-2 rounded-xl text-xs font-orbitron font-bold items-center gap-1.5 transition-all ${
                 isActive 
                   ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 
                   : 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30 hover:bg-blue-600 hover:text-white'
@@ -84,7 +93,7 @@ const NavBar = () => {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2.5 p-1.5 pr-3 rounded-full bg-white dark:bg-gray-800 border border-border hover:border-accent shadow-sm transition-all group"
+                className="flex items-center gap-2 p-1.5 pr-2.5 rounded-full bg-white dark:bg-gray-800 border border-border hover:border-accent shadow-sm transition-all group"
               >
                 <img
                   src={activePatient.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80'}
@@ -129,7 +138,7 @@ const NavBar = () => {
                     <span className="text-[10px] font-orbitron uppercase text-text-muted tracking-wider block px-2 py-1">
                       Switch Real Patient Profile:
                     </span>
-                    <div className="space-y-1">
+                    <div className="space-y-1 max-h-36 overflow-y-auto">
                       {REAL_PATIENT_PRESETS.map((p) => (
                         <button
                           key={p.id}
@@ -150,21 +159,38 @@ const NavBar = () => {
                     </div>
                   </div>
 
+                  {/* Navigation Links inside Dropdown for Fast Access */}
                   <div className="border-t border-border pt-1.5 space-y-1">
                     <Link
-                      to="/profile"
+                      to="/scanner"
                       onClick={() => setDropdownOpen(false)}
-                      className="w-full px-3 py-2 rounded-xl text-xs font-orbitron text-text hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors"
+                      className="w-full px-3 py-2 rounded-xl text-xs font-orbitron text-accent hover:bg-accent/10 flex items-center gap-2 transition-colors font-bold"
                     >
-                      <User size={14} className="text-accent" /> Edit Emergency Passport
+                      <Pill size={14} /> AI Medicine Scanner
                     </Link>
 
                     <Link
                       to="/doctor-portal"
                       onClick={() => setDropdownOpen(false)}
-                      className="w-full px-3 py-2 rounded-xl text-xs font-orbitron text-blue-600 hover:bg-blue-500/10 flex items-center gap-2 transition-colors"
+                      className="w-full px-3 py-2 rounded-xl text-xs font-orbitron text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 flex items-center gap-2 transition-colors font-bold"
                     >
-                      <Stethoscope size={14} className="text-blue-500" /> Prescribe as Physician
+                      <Stethoscope size={14} /> Doctor Clinical Portal
+                    </Link>
+
+                    <Link
+                      to="/health-twin"
+                      onClick={() => setDropdownOpen(false)}
+                      className="w-full px-3 py-2 rounded-xl text-xs font-orbitron text-text hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors"
+                    >
+                      <Heart size={14} className="text-accent" /> Digital Health Twin
+                    </Link>
+
+                    <Link
+                      to="/profile"
+                      onClick={() => setDropdownOpen(false)}
+                      className="w-full px-3 py-2 rounded-xl text-xs font-orbitron text-text hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors"
+                    >
+                      <User size={14} className="text-accent" /> Emergency Passport
                     </Link>
 
                     <Link
@@ -172,7 +198,7 @@ const NavBar = () => {
                       onClick={() => setDropdownOpen(false)}
                       className="w-full px-3 py-2 rounded-xl text-xs font-orbitron text-text hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors"
                     >
-                      <Sparkles size={14} className="text-accent" /> Register New Patient
+                      <Sparkles size={14} className="text-accent" /> Register Custom Patient
                     </Link>
 
                     <button
@@ -191,16 +217,50 @@ const NavBar = () => {
             </div>
           )}
 
-          {/* Quick Login button */}
-          <Link
-            to="/login"
-            className="hidden sm:flex px-3 py-2 rounded-xl border border-border hover:border-accent text-text font-orbitron text-xs font-semibold items-center gap-1.5 transition-colors"
+          {/* Mobile / Tablet Menu Button (Hamburger) */}
+          <button
+            id="mobile-menu-btn"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-2 rounded-xl bg-surface border border-border text-text hover:border-accent transition-colors"
+            aria-label="Toggle navigation menu"
           >
-            <User size={13} className="text-accent" /> Portal
-          </Link>
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
 
       </div>
+
+      {/* Mobile / Tablet Navigation Drawer */}
+      {mobileMenuOpen && (
+        <div 
+          ref={mobileMenuRef}
+          className="lg:hidden border-b border-border bg-white dark:bg-gray-900 px-4 py-4 shadow-2xl animate-in slide-in-from-top-4 duration-200 space-y-1"
+        >
+          <span className="text-[10px] font-orbitron text-text-muted uppercase tracking-wider block px-3 py-1">
+            Navigate MediLink Sections:
+          </span>
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.name}
+                to={item.path}
+                onClick={() => setMobileMenuOpen(false)}
+                className={({ isActive }) => 
+                  `px-3 py-2.5 rounded-xl font-orbitron text-xs font-semibold flex items-center gap-3 transition-colors ${
+                    isActive 
+                      ? 'bg-accent text-white shadow-sm' 
+                      : 'text-text hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`
+                }
+              >
+                <Icon size={16} />
+                <span>{item.name}</span>
+              </NavLink>
+            );
+          })}
+        </div>
+      )}
     </nav>
   );
 };
