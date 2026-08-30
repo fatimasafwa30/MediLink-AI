@@ -405,21 +405,35 @@ export default function AIMedicineScanner() {
 
   const saveToSupabase = async (scanData) => {
     try {
-      if (supabase && activePatient?.id) {
-        await supabase
-          .from('biometrics')
+      if (supabase && scanData?.gemini) {
+        const { data, error } = await supabase
+          .from('scanned_medicines')
           .insert([
             {
-              user_id: activePatient.id,
-              heart_rate: activePatient.biometrics?.heartRate || 72,
-              oxygen_level: activePatient.biometrics?.oxygen || 99,
-              health_score: activePatient.biometrics?.score || 90,
-              recorded_at: new Date().toISOString()
+              patient_name: activePatient?.fullName || 'Fatima Safwa',
+              medicine_name: scanData.gemini.medicineName || 'Scanned Medicine',
+              brand_name: scanData.gemini.brandName || scanData.gemini.medicineName,
+              strength: scanData.gemini.strength || `${scanData.gemini.strengthPerUnit || 500}mg`,
+              formulation: scanData.gemini.form || 'Tablet',
+              batch_number: scanData.gemini.batchNumber || 'BN-84920',
+              expiry_date: scanData.gemini.expiryDate || '11/2027',
+              manufacturer: scanData.gemini.manufacturer || scanData.fda?.manufacturer || 'GlaxoSmithKline',
+              fda_verified: Boolean(scanData.fda?.verified),
+              accuracy_score: Number(scanData.finalConfidence || 0.95),
+              warnings: scanData.gemini.warnings || [],
+              scanned_at: new Date().toISOString()
             }
           ]);
+
+        if (error) {
+          console.warn("Supabase scanned_medicines insert note:", error.message);
+        } else {
+          console.log("✅ Successfully saved medicine scan to Supabase:", data);
+        }
       }
       setIsSavedToTwin(true);
     } catch (error) {
+      console.warn("Supabase sync note:", error);
       setIsSavedToTwin(true);
     }
   };

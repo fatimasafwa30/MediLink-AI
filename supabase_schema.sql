@@ -114,6 +114,23 @@ CREATE TABLE public.chat_history (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 9. AI Scanned Medicines Log
+CREATE TABLE public.scanned_medicines (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  patient_name TEXT,
+  medicine_name TEXT NOT NULL,
+  brand_name TEXT,
+  strength TEXT,
+  formulation TEXT,
+  batch_number TEXT,
+  expiry_date TEXT,
+  manufacturer TEXT,
+  fda_verified BOOLEAN DEFAULT false,
+  accuracy_score NUMERIC,
+  warnings TEXT[],
+  scanned_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- ==========================================
 -- Row-Level Security (RLS) Policies
 -- ==========================================
@@ -127,6 +144,11 @@ ALTER TABLE public.specialists ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.hospitals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.drone_dispatch ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.scanned_medicines ENABLE ROW LEVEL SECURITY;
+
+-- Allow read and insert for scanned medicines
+CREATE POLICY "Allow public insert to scanned_medicines" ON public.scanned_medicines FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public select on scanned_medicines" ON public.scanned_medicines FOR SELECT USING (true);
 
 -- Users can read and update their own profile (including GPS updates)
 CREATE POLICY "Users can view own profile" ON public.users FOR SELECT USING (auth.uid() = id);
