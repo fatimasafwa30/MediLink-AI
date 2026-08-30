@@ -128,7 +128,6 @@ function AppContent() {
           <Route path="/emergency" element={
             <PageWrapper>
               <AIEmergencyAssistant />
-              <SpecialistCards specialists={MOCK_DATA.specialists} />
             </PageWrapper>
           } />
           <Route path="/health-twin" element={
